@@ -6,6 +6,9 @@ const user = require("./controllers/usersController");
 
 const app = express(); // express() return object. we assign it as app
 
+const swaggerJsDoc = require("swagger-jsdoc");
+const swaggerUi = require("swagger-ui-express");
+
 const PORT = process.env.PORT || 8081;
 var corOptions = {
   origin: "*",
@@ -24,7 +27,26 @@ app.use(express.json());
 
 app.use(express.urlencoded({ extended: true }));
 
-//routers
+// Extended: https://swagger.io/specification/#infoObject
+const swaggerOptions = {
+  swaggerDefinition: {
+    info: {
+      version: "1.0.0",
+      title: "Donation API",
+      description: "Donation API Node JS Express",
+      contact: {
+        name: "Developer123",
+      },
+      servers: ["http://localhost:8081"],
+    },
+  },
+  // ['.routes/*.js']
+  apis: ["./controllers/*.js"],
+};
+
+const swaggerDocs = swaggerJsDoc(swaggerOptions);
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+
 app.use("/api/auth", auth);
 app.use("/api/users", user);
 // .................

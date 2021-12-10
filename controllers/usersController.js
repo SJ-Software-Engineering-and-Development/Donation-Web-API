@@ -149,6 +149,16 @@ router.post("/signup/:role", async (req, res) => {
   }, 1000);
 });
 
+// Routes
+/**
+ * @swagger
+ * /api/users/get:
+ *  get:
+ *    description: Use to request all users
+ *    responses:
+ *      '200':
+ *        description: A successful response
+ */
 router.get("/get", async (req, res) => {
   const users = await UserProfile.findAll({
     include: {
@@ -194,7 +204,7 @@ async function sendMail(user, userPassword, callback) {
     secure: true, // true for 465, false for 587, false for other ports
     auth: {
       user: "evergreen.group.lanka@gmail.com", //user: "evergreen.group.srilanaka@gmail.com",
-      pass: "evergreen@123", //pass: "evergreen@123",
+      pass: "", //pass: "evergreen@123",
     },
   });
   //"cshop3493@gmail.com","Coffee#123*"
