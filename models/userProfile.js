@@ -1,14 +1,6 @@
 module.exports = (Sequelize, DataTypes) => {
   const UserProfile = Sequelize.define("userProfile", {
-    firstName: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    middleName: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    lastName: {
+    fullName: {
       type: DataTypes.STRING,
       allowNull: false,
     },
@@ -18,6 +10,10 @@ module.exports = (Sequelize, DataTypes) => {
     },
     contact: {
       type: DataTypes.STRING,
+      allowNull: false,
+    },
+    dob: {
+      type: DataTypes.DATEONLY,
       allowNull: false,
     },
   });

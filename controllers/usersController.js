@@ -127,38 +127,37 @@ router.post("/signup/:role", async (req, res) => {
       .status(400)
       .send({ error: "A user with the given email already exists." });
 
-  const userPassword = passwordGenerator.generate({
-    length: 7,
-    numbers: true,
-  });
-
-  encryptedPassword = await bcrypt.hash(userPassword, 10);
+  encryptedPassword = await bcrypt.hash(userProfile.login.password, 5);
   userProfile.login.password = encryptedPassword;
 
   switch (role) {
-    case "manager":
-      userProfile.login.role = ROLE.Manager;
+    case ROLE.Client:
+      userProfile.login.role = ROLE.Client;
       newUser = await UserProfile.create(userProfile, {
         include: [Login],
       });
-      console.log("Manager`s password: " + userPassword);
       break;
   }
   //status , lastLogin has default values no need to set here
   if (!newUser)
     return res.status(400).send({ error: "Error! Server having some trubles" });
   //Simulate slow N/W
-  // setTimeout(() => {
-  //   return res.status(200).send({
-  //     data: `${userProfile.login.email} has been registered as a ${role}`,
-  //   });
-  // }, 4000);
-  sendMail(userProfile.login, userPassword, (info) => {
+  setTimeout(() => {
     return res.status(200).send({
       data: `${userProfile.login.email} has been registered as a ${role}`,
-      info,
     });
+  }, 1000);
+});
+
+router.get("/get", async (req, res) => {
+  const users = await UserProfile.findAll({
+    include: {
+      model: Login,
+      attributes: { exclude: ["password", "createdAt", "updatedAt"] },
+    },
   });
+
+  if (users) res.status(200).send(users);
 });
 
 router.get("/get/:id", async (req, res) => {
@@ -177,77 +176,6 @@ router.get("/get/:id", async (req, res) => {
 
   res.status(200).send(users);
 });
-
-/**
- * Get user by col.region and/or role
- * users/getBy?regionId=1&role=c-agent   OR
- * users/getBy?regionId=1
- */
-router.get("/getBy/", async (req, res) => {
-  if (!req.query.regionId)
-    return res.status(400).send({ error: "Region not given" });
-
-  const regionId = req.query.regionId; //collectingRegionId
-  let agents;
-  let coordinators;
-
-  if (!req.query.role) {
-    await getCAgentsByRegions(regionId, (_agents) => {
-      agents = _agents;
-    });
-    await getCoordinatorsByRegions(regionId, (_coordinators) => {
-      coordinators = _coordinators;
-    });
-
-    res.status(200).send({ agents: agents, coordinators: coordinators });
-  } else {
-    const role = req.query.role;
-    switch (role) {
-      case "c-agent":
-        await getCAgentsByRegions(regionId, (_agents) => {
-          agents = _agents;
-        });
-        res.status(200).send({ agents: agents });
-        break;
-      case "coordinator":
-        await getCoordinatorsByRegions(regionId, (_coordinators) => {
-          coordinators = _coordinators;
-        });
-        res.status(200).send({ coordinators: coordinators });
-        break;
-    }
-  }
-});
-
-async function getCAgentsByRegions(regionId, callback) {
-  const _agents = await collectingAgent.findAll({
-    where: {
-      collectingRegionId: regionId,
-    },
-    attributes: ["id", "empId"],
-    include: {
-      model: UserProfile,
-      attributes: ["firstName", "middleName", "lastName"],
-    },
-    //  attributes: { include: ["firstName"], exclude: ["login.id"] },
-  });
-  callback(_agents);
-}
-async function getCoordinatorsByRegions(regionId, callback) {
-  const _coordinators = await Coordinator.findAll({
-    where: {
-      collectingRegionId: regionId,
-    },
-    attributes: ["id", "empId"],
-    include: {
-      model: UserProfile,
-      attributes: ["firstName", "middleName", "lastName"],
-    },
-    //  attributes: { include: ["firstName"], exclude: ["login.id"] },
-  });
-
-  callback(_coordinators);
-}
 
 router.post("/sendmail", (req, res) => {
   console.log("request came");
