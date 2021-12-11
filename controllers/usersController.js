@@ -149,16 +149,6 @@ router.post("/signup/:role", async (req, res) => {
   }, 1000);
 });
 
-// Routes
-/**
- * @swagger
- * /api/users/get:
- *  get:
- *    description: Use to request all users
- *    responses:
- *      '200':
- *        description: A successful response
- */
 router.get("/get", async (req, res) => {
   const users = await UserProfile.findAll({
     include: {

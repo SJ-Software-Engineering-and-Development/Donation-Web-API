@@ -1,0 +1,150 @@
+{
+    "swagger": "2.0",
+    "info": {
+      "version": "1.0.0",
+      "title": "My User Project CRUD",
+      "description": "My User Project Application API",
+      "license": {
+        "name": "MIT",
+        "url": "https://opensource.org/licenses/MIT"
+      }
+    },
+    "host": "localhost:8081",
+    "basePath": "/",
+    "tags": [
+      {
+        "name": "Users",
+        "description": "API for users in the system"
+      }
+    ],
+    "schemes": ["http"],
+    "consumes": ["application/json"],
+    "produces": ["application/json"],
+
+    "paths": {
+      "/api/users/get": {
+        "get": {
+          "tags": ["Users"],
+          "summary": "Get all users in system",
+          "responses": {
+            "200": {
+              "description": "OK",
+              "schema": {
+                "$ref": "#/definitions/Users"
+              }
+            }
+          }
+        }
+      },
+      "/api/users/get/{id}": {
+        "get": {
+          "tags": ["Users"],
+          "summary": "Get a user by id",
+          "parameters": 
+          [{
+            "name":"id",
+            "in": "path", 
+            "description": "Id of the user",
+            "required": "true",
+            "schema":{
+            "type": "integer",
+            "format": "integer"
+            }
+         }
+        ],            
+          "responses": {
+            "200": {
+              "description": "OK",
+              "schema": {
+                "$ref": "#/definitions/Users"
+              }
+            }
+          }
+        }
+      },
+
+      "/api/users/signup/{role}": {
+        "post": {
+          "tags": ["Users"],
+          "summary": "Create new user",
+          "description": "Create new user in system",
+          "parameters": [
+            {
+               "name":"role",
+               "in": "path", 
+               "description": "Role of the candidate user",
+               "required": "true",
+               "schema":{
+               "type": "string",
+               "format": "string"
+               }
+            },
+            {
+              "name": "user",
+              "in": "body",
+              "description": "User that we want to create",
+              "schema": {
+                "$ref": "#/definitions/User"
+              }
+            }
+          ],
+          "produces": ["application/json"],
+          "responses": {
+            "200": {
+              "description": "New user is created",
+              "schema": {
+                "$ref": "#/definitions/User"
+              }
+            }
+          }
+        }
+      }
+    
+    },
+    "definitions": {
+      "User": {
+        "required": ["userProfile"],
+        "properties": {
+            "userProfile": {
+              "type": "object",
+              "properties": {
+                "fullName": {
+                  "type": "string"
+                },
+                "address": {
+                  "type": "string"
+                },
+                "contact": {
+                  "type": "string"
+                },
+                "dob": {
+                  "type": "string",
+                  "format":"date"
+                },
+                "login": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                        "type": "string"
+                      },
+                    "email": {
+                        "type": "string"
+                      },
+                    "password": {
+                        "type": "string"
+                      },
+                    "avatar": {
+                        "type": "string"
+                      }
+                  }
+                }
+              }
+            }
+        }
+      },
+      "example2": {
+        "type": "array",
+        "$ref": "#/definitions/User"
+      }
+    }
+  }

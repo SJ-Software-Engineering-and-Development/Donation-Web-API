@@ -28,24 +28,25 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Extended: https://swagger.io/specification/#infoObject
-const swaggerOptions = {
-  swaggerDefinition: {
-    info: {
-      version: "1.0.0",
-      title: "Donation API",
-      description: "Donation API Node JS Express",
-      contact: {
-        name: "Developer123",
-      },
-      servers: ["http://localhost:8081"],
-    },
-  },
-  // ['.routes/*.js']
-  apis: ["./controllers/*.js"],
-};
+// const swaggerOptions = {
+//   swaggerDefinition: {
+//     info: {
+//       version: "1.0.0",
+//       title: "Donation API",
+//       description: "Donation API Node JS Express",
+//       contact: {
+//         name: "Developer123",
+//       },
+//       servers: [`http://localhost:8081${PORT}`],
+//     },
+//   },
+//   // ['.routes/*.js']
+//   apis: ["./controllers/*.js"],
+// };
 
-const swaggerDocs = swaggerJsDoc(swaggerOptions);
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+// const swaggerDocs = swaggerJsDoc(swaggerOptions);
+const swaggerDocument = require("./swagger.json");
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.use("/api/auth", auth);
 app.use("/api/users", user);
