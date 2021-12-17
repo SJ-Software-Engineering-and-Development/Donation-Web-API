@@ -19,32 +19,14 @@ var corOptions = {
     "Content-Type, Content-Length, Authorization, Accept, X-Requested-With",
 };
 
-//midlewares
+// midlewares...........
 app.use(cors(corOptions));
 
 //This belogns to requesat posessing pipe line. so we handling req and res by JSON format.
 app.use(express.json());
 
 app.use(express.urlencoded({ extended: true }));
-
-// Extended: https://swagger.io/specification/#infoObject
-// const swaggerOptions = {
-//   swaggerDefinition: {
-//     info: {
-//       version: "1.0.0",
-//       title: "Donation API",
-//       description: "Donation API Node JS Express",
-//       contact: {
-//         name: "Developer123",
-//       },
-//       servers: [`http://localhost:8081${PORT}`],
-//     },
-//   },
-//   // ['.routes/*.js']
-//   apis: ["./controllers/*.js"],
-// };
-
-// const swaggerDocs = swaggerJsDoc(swaggerOptions);
+app.use("/uploads", express.static("uploads")); //make uploads folder public & static to route that has url/uploads
 const swaggerDocument = require("./swagger.json");
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
@@ -54,7 +36,7 @@ app.use("/api/users", user);
 
 //Testing api
 app.get("/", (req, res) => {
-  res.json({ messagge: "Hello from API" });
+  res.json({ messagge: "Hello from Donation API" });
 });
 
 //server . this start listing on the given port

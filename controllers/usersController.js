@@ -4,19 +4,19 @@ const router = require("express").Router();
 const bcrypt = require("bcrypt");
 const verifyToken = require("../middleware/verifyToken");
 const nodemailer = require("nodemailer");
-const passwordGenerator = require("generate-password");
 const querystring = require("querystring");
+const multer = require("multer");
+const fs = require("fs");
+
+const imgHelper = require("../helpers/imageFilter");
+const imgStorage = require("../storageConfig");
 
 const db = require("../models");
 const Login = db.login;
 const UserProfile = db.userProfile;
 const Farmer = db.farmer;
-const Coordinator = db.coordinator;
-const collectingAgent = db.collectingAgent;
 
 const ROLE = require("../config/roleEnum");
-const { date } = require("joi");
-const userProfile = require("../models/userProfile");
 
 const schema = Joi.object({
   name: Joi.string().required().min(2),
@@ -106,47 +106,105 @@ router.get("/getProfiles", async (req, res) => {
   res.status(200).send(users);
 });
 
-//Test
-// router.get("/getProfiles", async (req, res) => {
-//   const users = await UserProfile.findAll();
-//   if (!users) return res.status(400).send({ error: "No users found." });
-
-//   res.status(200).send(users);
-// });
-
 router.post("/signup/:role", async (req, res) => {
-  const { userProfile } = req.body;
   const role = req.params.role;
   let newUser = {};
 
-  const oldUser = await Login.findOne({
-    where: { email: userProfile.login.email },
-  });
-  if (oldUser)
-    return res
-      .status(400)
-      .send({ error: "A user with the given email already exists." });
+  const upload = multer({
+    storage: imgStorage.storage,
+    limits: { fileSize: 1024 * 1024 * 5 },
+    fileFilter: imgHelper.imageFilter,
+  }).single("avatar");
 
-  encryptedPassword = await bcrypt.hash(userProfile.login.password, 5);
-  userProfile.login.password = encryptedPassword;
+  upload(req, res, async function (err) {
+    // req.file contains information of uploaded file
+    // req.body contains information of text fields, if there were any
+    const fullName = req.body.fullName;
+    const address = req.body.address;
+    const contact = req.body.contact;
+    const dob = req.body.dob;
+    const name = req.body.name;
+    const email = req.body.email;
+    const password = req.body.password;
+    const avatar = req.body.avatar;
 
-  switch (role) {
-    case ROLE.Client:
-      userProfile.login.role = ROLE.Client;
-      newUser = await UserProfile.create(userProfile, {
-        include: [Login],
-      });
-      break;
-  }
-  //status , lastLogin has default values no need to set here
-  if (!newUser)
-    return res.status(400).send({ error: "Error! Server having some trubles" });
-  //Simulate slow N/W
-  setTimeout(() => {
-    return res.status(200).send({
-      data: `${userProfile.login.email} has been registered as a ${role}`,
+    const oldUser = await Login.findOne({
+      where: { email: email },
     });
+    if (oldUser) {
+      //Remove uploaded file from ./uploads folder
+      fs.unlink(req.file.path, (err) => {
+        if (err) {
+          console.error(err);
+        }
+        //file removed success
+      });
+      return res
+        .status(400)
+        .send({ error: "A user with the given email already exists." });
+    }
+
+    if (req.fileValidationError) {
+      return res.status(400).send({ error: req.fileValidationError });
+    } else if (!req.file) {
+      return res
+        .status(400)
+        .send({ error: "Please select an image to upload" });
+    } else if (err instanceof multer.MulterError) {
+      return res.status(400).send({ error: err });
+    } else if (err) {
+      return res.status(400).send({ error: err });
+    }
+
+    //store in Db
+    let uData = {
+      userProfile: {
+        fullName: "",
+        address: "",
+        contact: "",
+        dob: "",
+        login: {
+          name: "",
+          email: "",
+          password: "",
+          avatar: "",
+        },
+      },
+    };
+
+    uData.userProfile.fullName = fullName;
+    uData.userProfile.address = address;
+    uData.userProfile.contact = contact;
+    uData.userProfile.dob = dob;
+    uData.userProfile.login.name = name;
+    uData.userProfile.login.email = email;
+    encryptedPassword = await bcrypt.hash(password, 5);
+    uData.userProfile.login.password = encryptedPassword;
+    uData.userProfile.login.avatar = req.file.path;
+
+    switch (role) {
+      case ROLE.Client:
+        uData.userProfile.login.role = ROLE.Client;
+        newUser = await UserProfile.create(uData.userProfile, {
+          include: [Login],
+        });
+        break;
+    }
+    //status , lastLogin has default values no need to set here
+    if (!newUser)
+      return res
+        .status(400)
+        .send({ error: "Error! Server having some trubles" });
+
+    return res.status(200).send({
+      data: `${uData.userProfile.login.email} has been registered as a ${role}`,
+    });
+    /* Simulate slow N/W
+  setTimeout(() => {
+    
   }, 1000);
+  */
+  });
 });
 
 router.get("/get", async (req, res) => {
@@ -215,5 +273,38 @@ async function sendMail(user, userPassword, callback) {
 
   callback(info);
 }
+
+router.post("/upload-profile-pic", (req, res, next) => {
+  // console.log(req.file);
+  const name = req.body.name;
+  const address = req.body.address;
+
+  const upload = multer({
+    storage: imgStorage.storage,
+    limits: { fileSize: 1024 * 1024 * 5 },
+    fileFilter: imgHelper.imageFilter,
+  }).single("productImage");
+
+  upload(req, res, function (err) {
+    // req.file contains information of uploaded file
+    // req.body contains information of text fields, if there were any
+
+    if (req.fileValidationError) {
+      return res.status(400).send({ error: req.fileValidationError });
+    } else if (!req.file) {
+      return res
+        .status(400)
+        .send({ error: "Please select an image to upload" });
+    } else if (err instanceof multer.MulterError) {
+      return res.status(400).send({ error: err });
+    } else if (err) {
+      return res.status(400).send({ error: err });
+    }
+
+    //store in Db
+    const imgPath = req.file.path;
+    res.status(200).send({ message: imgPath });
+  });
+});
 
 module.exports = router;
