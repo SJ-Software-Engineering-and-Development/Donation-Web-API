@@ -1,22 +1,23 @@
 module.exports = (Sequelize, DataTypes) => {
-  const UserProfile = Sequelize.define("userProfile", {
-    fullName: {
+  const Category = Sequelize.define("category", {
+    name: {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    address: {
+    description: {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    contact: {
+    image: {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    dob: {
-      type: DataTypes.DATEONLY,
+    status: {
+      type: DataTypes.STRING,
       allowNull: false,
+      defaultValue: "active",
     },
   });
 
-  return UserProfile;
+  return Category;
 };

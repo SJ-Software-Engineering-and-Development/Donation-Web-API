@@ -6,6 +6,9 @@ const user = require("./controllers/usersController");
 
 const app = express(); // express() return object. we assign it as app
 
+const swaggerJsDoc = require("swagger-jsdoc");
+const swaggerUi = require("swagger-ui-express");
+
 const PORT = process.env.PORT || 8081;
 var corOptions = {
   origin: "*",
@@ -16,22 +19,24 @@ var corOptions = {
     "Content-Type, Content-Length, Authorization, Accept, X-Requested-With",
 };
 
-//midlewares
+// midlewares...........
 app.use(cors(corOptions));
 
 //This belogns to requesat posessing pipe line. so we handling req and res by JSON format.
 app.use(express.json());
 
 app.use(express.urlencoded({ extended: true }));
+app.use("/uploads", express.static("uploads")); //make uploads folder public & static to route that has url/uploads
+const swaggerDocument = require("./swagger.json");
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
-//routers
 app.use("/api/auth", auth);
 app.use("/api/users", user);
 // .................
 
 //Testing api
 app.get("/", (req, res) => {
-  res.json({ messagge: "Hello from API" });
+  res.json({ messagge: "Hello from Donation API" });
 });
 
 //server . this start listing on the given port

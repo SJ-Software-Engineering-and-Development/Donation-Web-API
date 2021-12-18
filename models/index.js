@@ -40,7 +40,7 @@ db.userProfile.login = db.userProfile.belongsTo(db.login, {
 });
 
 db.sequelize
-  .sync({ force: true }) //force :true - drop all tables before start
+  .sync({ force: false }) //force :true - drop all tables before start
   .then(() => {
     console.log("yes re-sync done!");
   });
