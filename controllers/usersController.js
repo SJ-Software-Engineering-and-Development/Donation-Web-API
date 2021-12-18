@@ -8,6 +8,7 @@ const querystring = require("querystring");
 const multer = require("multer");
 const fs = require("fs");
 
+const ROLE = require("../config/roleEnum");
 const imgHelper = require("../helpers/imageFilter");
 const imgStorage = require("../storageConfig");
 
@@ -16,40 +17,19 @@ const Login = db.login;
 const UserProfile = db.userProfile;
 const Farmer = db.farmer;
 
-const ROLE = require("../config/roleEnum");
-
 const schema = Joi.object({
-  name: Joi.string().required().min(2),
+  fullName: Joi.string().required(),
+  address: Joi.string().required(),
+  contact: Joi.string().required(),
+  dob: Joi.string().required(),
+  name: Joi.string().required(),
   email: Joi.string().email().required(),
-  password: Joi.string().required().min(5),
-  role: Joi.valid(...[ROLE.Admin, ROLE.Client, ROLE.Moderator]),
-  collectingRegionId: Joi.number(),
-  collectingAgentId: Joi.number(),
-  coordinatorId: Joi.number(),
+  password: Joi.string().required().min(4),
+  avatar: Joi.any(),
 });
 
 const signOutSchema = Joi.object({
   email: Joi.string().email().required(),
-});
-
-router.post("/signup", validateWith(schema), async (req, res) => {
-  const { name, email, password, role } = req.body;
-  const oldUser = await Login.findOne({ where: { email: email } });
-  if (oldUser)
-    return res
-      .status(400)
-      .send({ error: "A user with the given email already exists." });
-
-  encryptedPassword = await bcrypt.hash(password, 10);
-
-  const user = await Login.create({
-    name: name,
-    email: email,
-    password: encryptedPassword,
-    role: role,
-    status: "offline",
-  });
-  res.status(200).send(user);
 });
 
 router.post(
@@ -119,6 +99,31 @@ router.post("/signup/:role", async (req, res) => {
   upload(req, res, async function (err) {
     // req.file contains information of uploaded file
     // req.body contains information of text fields, if there were any
+
+    if (req.fileValidationError) {
+      return res.status(400).send({ error: req.fileValidationError });
+    } else if (!req.file) {
+      return res
+        .status(400)
+        .send({ error: "Please select an image to upload" });
+    } else if (err instanceof multer.MulterError) {
+      return res.status(400).send({ error: err });
+    } else if (err) {
+      return res.status(400).send({ error: err });
+    }
+
+    const { error, value } = schema.validate({
+      fullName: req.body.fullName,
+      address: req.body.address,
+      contact: req.body.contact,
+      dob: req.body.dob,
+      name: req.body.name,
+      email: req.body.email,
+      password: req.body.password,
+      avatar: req.file.path,
+    });
+    if (error) return res.status(400).send({ error: error.details[0].message });
+
     const fullName = req.body.fullName;
     const address = req.body.address;
     const contact = req.body.contact;
@@ -126,7 +131,6 @@ router.post("/signup/:role", async (req, res) => {
     const name = req.body.name;
     const email = req.body.email;
     const password = req.body.password;
-    const avatar = req.body.avatar;
 
     const oldUser = await Login.findOne({
       where: { email: email },
@@ -142,18 +146,6 @@ router.post("/signup/:role", async (req, res) => {
       return res
         .status(400)
         .send({ error: "A user with the given email already exists." });
-    }
-
-    if (req.fileValidationError) {
-      return res.status(400).send({ error: req.fileValidationError });
-    } else if (!req.file) {
-      return res
-        .status(400)
-        .send({ error: "Please select an image to upload" });
-    } else if (err instanceof multer.MulterError) {
-      return res.status(400).send({ error: err });
-    } else if (err) {
-      return res.status(400).send({ error: err });
     }
 
     //store in Db
@@ -273,38 +265,5 @@ async function sendMail(user, userPassword, callback) {
 
   callback(info);
 }
-
-router.post("/upload-profile-pic", (req, res, next) => {
-  // console.log(req.file);
-  const name = req.body.name;
-  const address = req.body.address;
-
-  const upload = multer({
-    storage: imgStorage.storage,
-    limits: { fileSize: 1024 * 1024 * 5 },
-    fileFilter: imgHelper.imageFilter,
-  }).single("productImage");
-
-  upload(req, res, function (err) {
-    // req.file contains information of uploaded file
-    // req.body contains information of text fields, if there were any
-
-    if (req.fileValidationError) {
-      return res.status(400).send({ error: req.fileValidationError });
-    } else if (!req.file) {
-      return res
-        .status(400)
-        .send({ error: "Please select an image to upload" });
-    } else if (err instanceof multer.MulterError) {
-      return res.status(400).send({ error: err });
-    } else if (err) {
-      return res.status(400).send({ error: err });
-    }
-
-    //store in Db
-    const imgPath = req.file.path;
-    res.status(200).send({ message: imgPath });
-  });
-});
 
 module.exports = router;

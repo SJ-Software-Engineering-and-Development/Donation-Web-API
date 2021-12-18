@@ -3,6 +3,7 @@ const cors = require("cors");
 
 const auth = require("./controllers/authController");
 const user = require("./controllers/usersController");
+const category = require("./controllers/categotyController");
 
 const app = express(); // express() return object. we assign it as app
 
@@ -24,6 +25,7 @@ app.use(cors(corOptions));
 
 //This belogns to requesat posessing pipe line. so we handling req and res by JSON format.
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 app.use(express.urlencoded({ extended: true }));
 app.use("/uploads", express.static("uploads")); //make uploads folder public & static to route that has url/uploads
@@ -32,6 +34,7 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.use("/api/auth", auth);
 app.use("/api/users", user);
+app.use("/api/categories", category);
 // .................
 
 //Testing api

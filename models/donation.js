@@ -3,6 +3,7 @@ module.exports = (Sequelize, DataTypes) => {
     status: {
       type: DataTypes.STRING,
       allowNull: false,
+      defaultValue: "donated",
     },
     amount: {
       type: DataTypes.DECIMAL(10, 2),
@@ -11,6 +12,10 @@ module.exports = (Sequelize, DataTypes) => {
     details: {
       type: DataTypes.STRING,
       allowNull: false,
+    },
+    type: {
+      type: DataTypes.STRING,
+      allowNull: false, //money | items
     },
     isPublic: {
       type: DataTypes.BOOLEAN,

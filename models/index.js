@@ -31,12 +31,34 @@ db.sequelize = sequelize;
 
 db.login = require("./login.js")(sequelize, DataTypes);
 db.userProfile = require("./userProfile.js")(sequelize, DataTypes);
+db.fund = require("./fund.js")(sequelize, DataTypes);
+db.donation = require("./donation.js")(sequelize, DataTypes);
+db.category = require("./category.js")(sequelize, DataTypes);
 
-//relations
-
+//Relations
 db.userProfile.login = db.userProfile.belongsTo(db.login, {
   onDelete: "CASCADE",
   onUpdate: "CASCADE",
+});
+
+db.fund.donation = db.fund.hasMany(db.donation, {
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
+
+db.fund.userProfile = db.fund.belongsTo(db.userProfile, {
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
+db.fund.category = db.fund.belongsTo(db.category, {
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
+
+db.donation.userProfile = db.donation.belongsTo(db.userProfile, {
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+  foreignKey: "donatorId", //donatorId = userProfileId
 });
 
 db.sequelize

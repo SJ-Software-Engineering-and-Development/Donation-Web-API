@@ -23,6 +23,7 @@ module.exports = (Sequelize, DataTypes) => {
     status: {
       type: DataTypes.STRING,
       allowNull: false,
+      defaultValue: "pending",
     },
   });
 
