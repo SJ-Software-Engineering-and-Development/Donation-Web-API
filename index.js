@@ -4,6 +4,7 @@ const cors = require("cors");
 const auth = require("./controllers/authController");
 const user = require("./controllers/usersController");
 const category = require("./controllers/categotyController");
+const fund = require("./controllers/fundController");
 
 const app = express(); // express() return object. we assign it as app
 
@@ -27,7 +28,6 @@ app.use(cors(corOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use(express.urlencoded({ extended: true }));
 app.use("/uploads", express.static("uploads")); //make uploads folder public & static to route that has url/uploads
 const swaggerDocument = require("./swagger.json");
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
@@ -35,6 +35,7 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 app.use("/api/auth", auth);
 app.use("/api/users", user);
 app.use("/api/categories", category);
+app.use("/api/funds", fund);
 // .................
 
 //Testing api
