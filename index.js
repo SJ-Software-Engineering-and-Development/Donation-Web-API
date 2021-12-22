@@ -1,5 +1,6 @@
 const express = require("express"); //require("express") return an method. we assign as express
 const cors = require("cors");
+const logSymbols = require("log-symbols");
 
 const auth = require("./controllers/authController");
 const user = require("./controllers/usersController");
@@ -45,5 +46,8 @@ app.get("/", (req, res) => {
 
 //server . this start listing on the given port
 app.listen(PORT, () => {
-  console.log(`Server is runing on port ${PORT}`);
+  console.log(
+    logSymbols.success + "\x1b[36m%s\x1b[0m",
+    ` Server is runing on port ${PORT}`
+  );
 });

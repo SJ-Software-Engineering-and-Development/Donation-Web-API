@@ -46,7 +46,20 @@ router.get("/:status", async (req, res) => {
 
   switch (status) {
     case "active":
-      options = { where: { status: "active" } };
+      options = {
+        where: { status: "active" },
+        include: [
+          {
+            model: Category,
+            attributes: {
+              exclude: ["createdAt", "updatedAt"],
+            },
+          },
+        ],
+        attributes: {
+          exclude: ["createdAt", "updatedAt"],
+        },
+      };
       break;
     case "pending":
       options = { where: { status: "pending" } };

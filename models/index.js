@@ -1,12 +1,14 @@
-const dbConfig = require("../config/dbConfig");
-
+const logSymbols = require("log-symbols");
 const { Sequelize, DataTypes } = require("sequelize");
+
+const dbConfig = require("../config/dbConfig");
 
 //object initilize. (pass parameter to constructor)
 const sequelize = new Sequelize(dbConfig.DB, dbConfig.USER, dbConfig.PASSWORD, {
   host: dbConfig.HOST,
   dialect: dbConfig.dialect,
   operatorsAliases: false, //hide errors
+  logging: false, //outputing SQL to the console
   pool: {
     max: dbConfig.pool.max,
     min: dbConfig.pool.min,
@@ -18,10 +20,11 @@ const sequelize = new Sequelize(dbConfig.DB, dbConfig.USER, dbConfig.PASSWORD, {
 sequelize
   .authenticate()
   .then(() => {
-    console.log("DB connected!");
+    console.log(logSymbols.success + "\x1b[36m%s\x1b[0m", " DB connected");
+    // console.log("\x1b[36m%s\x1b[0m", "I am cyan color"); //cyan
   })
   .catch((err) => {
-    console.log("Error " + err);
+    console.log(logSymbols.error, " DB Connection Error");
   });
 
 const db = {}; // Empty object
@@ -64,7 +67,10 @@ db.donation.userProfile = db.donation.belongsTo(db.userProfile, {
 db.sequelize
   .sync({ force: false }) //force :true - drop all tables before start
   .then(() => {
-    console.log("yes re-sync done!");
+    console.log(
+      logSymbols.success + "\x1b[36m%s\x1b[0m",
+      " sequelize sync done ):"
+    );
   });
 
 module.exports = db;

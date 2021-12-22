@@ -42,7 +42,7 @@ router.post("/", validateWith(schema), async (req, res) => {
         name: user.name,
         email,
         role: user.role,
-        avatar: "assets/images/avatars/brian-hughes.jpg",
+        avatar: user.avatar,
         status: "online",
       },
       accessToken: token,
