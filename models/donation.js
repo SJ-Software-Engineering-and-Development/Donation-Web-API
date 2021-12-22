@@ -16,6 +16,7 @@ module.exports = (Sequelize, DataTypes) => {
     type: {
       type: DataTypes.STRING,
       allowNull: false, //money | items
+      defaultValue: "money",
     },
     isPublic: {
       type: DataTypes.BOOLEAN,

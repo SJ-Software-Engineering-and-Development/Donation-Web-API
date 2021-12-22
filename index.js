@@ -6,6 +6,7 @@ const auth = require("./controllers/authController");
 const user = require("./controllers/usersController");
 const category = require("./controllers/categotyController");
 const fund = require("./controllers/fundController");
+const donate = require("./controllers/donateController");
 
 const app = express(); // express() return object. we assign it as app
 
@@ -37,6 +38,7 @@ app.use("/api/auth", auth);
 app.use("/api/users", user);
 app.use("/api/categories", category);
 app.use("/api/funds", fund);
+app.use("/api/donate", donate);
 // .................
 
 //Testing api

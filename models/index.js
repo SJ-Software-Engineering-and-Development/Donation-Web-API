@@ -7,7 +7,7 @@ const dbConfig = require("../config/dbConfig");
 const sequelize = new Sequelize(dbConfig.DB, dbConfig.USER, dbConfig.PASSWORD, {
   host: dbConfig.HOST,
   dialect: dbConfig.dialect,
-  operatorsAliases: false, //hide errors
+  operatorsAliases: 0, //hide errors
   logging: false, //outputing SQL to the console
   pool: {
     max: dbConfig.pool.max,
@@ -22,6 +22,7 @@ sequelize
   .then(() => {
     console.log(logSymbols.success + "\x1b[36m%s\x1b[0m", " DB connected");
     // console.log("\x1b[36m%s\x1b[0m", "I am cyan color"); //cyan
+    //https://www.codegrepper.com/code-examples/javascript/how+to+show+in+nodejs+console+a+red+cross+sine+and+a+green+tick+sine
   })
   .catch((err) => {
     console.log(logSymbols.error, " DB Connection Error");
