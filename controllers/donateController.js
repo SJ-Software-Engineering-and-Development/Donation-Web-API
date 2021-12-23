@@ -17,7 +17,6 @@ const userProfile = db.userProfile;
 const Donate = db.donation;
 
 const donateSchema = Joi.object({
-  status: Joi.string().required(),
   amount: Joi.number().required(),
   details: Joi.string().required(),
   type: Joi.string().required(),
@@ -54,7 +53,6 @@ router.post("/", async (req, res) => {
     }
 
     const { error, value } = donateSchema.validate({
-      status: req.body.status,
       amount: req.body.amount,
       details: req.body.details,
       type: req.body.type,
@@ -63,8 +61,6 @@ router.post("/", async (req, res) => {
       fundId: req.body.fundId,
     });
     if (error) return res.status(400).send({ error: error.details[0].message });
-
-    const status = req.body.status;
     const amount = req.body.amount;
     const details = req.body.details;
     const type = req.body.type;
@@ -82,7 +78,6 @@ router.post("/", async (req, res) => {
     //store in Db
     let cData = {
       donation: {
-        status: status,
         amount: amount,
         details: details,
         type: type,
