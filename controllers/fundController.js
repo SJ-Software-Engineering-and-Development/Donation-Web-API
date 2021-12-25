@@ -80,6 +80,19 @@ router.get("/getByid/:id", async (req, res) => {
   return res.status(200).send({ data: fund });
 });
 
+router.get("/getMyFunds/:id", async (req, res) => {
+  const id = req.params.id;
+  if (!id) return res.status(400).send({ error: "Invalid id" });
+
+  let fund = await Fund.findAll({
+    where: { userProfileId: id },
+    include: [Category],
+  });
+  if (!fund) return res.status(400).send({ error: "Fund not found" });
+
+  return res.status(200).send({ data: fund });
+});
+
 router.get("/:status", async (req, res) => {
   const status = req.params.status; //all | active | deactive
   let options = {};
