@@ -84,13 +84,39 @@ router.get("/getMyFunds/:id", async (req, res) => {
   const id = req.params.id;
   if (!id) return res.status(400).send({ error: "Invalid id" });
 
-  let fund = await Fund.findAll({
+  let fundList = await Fund.findAll({
     where: { userProfileId: id },
     include: [Category],
   });
-  if (!fund) return res.status(400).send({ error: "Fund not found" });
+  if (!fundList) return res.status(400).send({ error: "Fund not found" });
 
-  return res.status(200).send({ data: fund });
+  myFunds = [];
+
+  for (i = 0; i < fundList.length; i++) {
+    var fund = {};
+    fund = fundList[i].dataValues;
+
+    //Get no of donations for each fund post
+    Donation.count({ where: { fundId: fundList[i].id } }).then((c) => {
+      fund.totalDonations = c;
+    });
+
+    //Get summations of donationsAmount for each fund post
+    let sumDon = await Donation.findAll({
+      where: { fundId: fundList[i].id },
+      attributes: [
+        [db.sequelize.fn("SUM", db.sequelize.col("amount")), "totalAmount"], // To add the aggregation...
+      ],
+    });
+
+    fund.totalDonationAmount =
+      sumDon[0].dataValues.totalAmount == null
+        ? "0.00"
+        : sumDon[0].dataValues.totalAmount;
+    myFunds.push(fund);
+  }
+
+  return res.status(200).send({ data: myFunds });
 });
 
 router.get("/:status", async (req, res) => {
@@ -159,5 +185,22 @@ router.patch("/:id/:status", async (req, res) => {
     data: `Fund status has been updated successfuly`,
   });
 });
+
+async function getSummation(id, callback) {
+  //get summation of donations
+  let sumDon = await Donation.findAll({
+    where: { fundId: id },
+    attributes: [
+      [db.sequelize.fn("SUM", db.sequelize.col("amount")), "totalAmount"], // To add the aggregation...
+    ],
+  });
+
+  totalDonAmount =
+    sumDon[0].dataValues.totalAmount == null
+      ? "0.00"
+      : sumDon[0].dataValues.totalAmount;
+
+  callback(totalDonAmount);
+}
 
 module.exports = router;

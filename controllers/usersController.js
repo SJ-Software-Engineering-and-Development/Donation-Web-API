@@ -230,7 +230,7 @@ router.get("/get/:id", async (req, res) => {
 router.post("/sendmail", (req, res) => {
   console.log("request came");
   let user = req.body;
-  sendMail(user, (info) => {
+  sendMail(user, "auto-password", (info) => {
     console.log(`The mail has beed send 😃 and the id is ${info.messageId}`);
     res.send(info);
   });
