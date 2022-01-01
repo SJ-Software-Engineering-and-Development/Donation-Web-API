@@ -22,24 +22,6 @@ const fundSchema = Joi.object({
   categoryId: Joi.number().required(),
 });
 
-router.post("/", validateWith(fundSchema), async (req, res) => {
-  let fund = req.body;
-  fund.createdDate = Date.now();
-
-  const category = await Category.findByPk(fund.categoryId);
-  if (!category) return res.status(400).send({ error: "Invalid Category" });
-  const profile = await userProfile.findByPk(fund.userProfileId);
-  if (!profile) return res.status(400).send({ error: "Invalid userId" });
-
-  const newFund = await Fund.create(fund);
-  if (!newFund)
-    return res.status(400).send({ error: "Error! Server having some trubles" });
-
-  return res.status(200).send({
-    data: `New Fund has been created`,
-  });
-});
-
 router.get("/getByid/:id", async (req, res) => {
   const id = req.params.id;
   if (!id) return res.status(400).send({ error: "Invalid id" });
@@ -164,6 +146,24 @@ router.get("/:status", async (req, res) => {
   res.status(200).send(funds);
 });
 
+router.post("/", validateWith(fundSchema), async (req, res) => {
+  let fund = req.body;
+  fund.createdDate = Date.now();
+
+  const category = await Category.findByPk(fund.categoryId);
+  if (!category) return res.status(400).send({ error: "Invalid Category" });
+  const profile = await userProfile.findByPk(fund.userProfileId);
+  if (!profile) return res.status(400).send({ error: "Invalid userId" });
+
+  const newFund = await Fund.create(fund);
+  if (!newFund)
+    return res.status(400).send({ error: "Error! Server having some trubles" });
+
+  return res.status(200).send({
+    data: `New Fund has been created`,
+  });
+});
+
 router.patch("/:id/:status", async (req, res) => {
   const status = req.params.status;
   const id = req.params.id;
@@ -186,21 +186,20 @@ router.patch("/:id/:status", async (req, res) => {
   });
 });
 
-async function getSummation(id, callback) {
-  //get summation of donations
-  let sumDon = await Donation.findAll({
-    where: { fundId: id },
-    attributes: [
-      [db.sequelize.fn("SUM", db.sequelize.col("amount")), "totalAmount"], // To add the aggregation...
-    ],
+router.delete("/:id", async (req, res) => {
+  const id = req.params.id;
+
+  const fund = await Fund.findByPk(id);
+  if (!fund)
+    return res.status(400).send({ error: "Fund not found for given id" });
+
+  const del = await fund.destroy();
+  if (!del)
+    return res.status(400).send({ error: "Cannot Delete fund, Try again!" });
+
+  return res.status(200).send({
+    data: "Fund deleted successfuly",
   });
-
-  totalDonAmount =
-    sumDon[0].dataValues.totalAmount == null
-      ? "0.00"
-      : sumDon[0].dataValues.totalAmount;
-
-  callback(totalDonAmount);
-}
+});
 
 module.exports = router;

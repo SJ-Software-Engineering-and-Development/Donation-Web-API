@@ -15,7 +15,6 @@ const imgStorage = require("../storageConfig");
 const db = require("../models");
 const Login = db.login;
 const UserProfile = db.userProfile;
-const Farmer = db.farmer;
 
 const schema = Joi.object({
   fullName: Joi.string().required(),
@@ -70,20 +69,6 @@ router.get("/", verifyToken, async (req, res) => {
   setTimeout(() => {
     res.status(200).send(users);
   }, 2000);
-});
-
-router.get("/getProfiles", async (req, res) => {
-  const users = await Farmer.findAll({
-    include: [
-      {
-        association: Farmer.userProfile,
-        include: [Login],
-      },
-    ],
-  });
-  if (!users) return res.status(400).send({ error: "No users found." });
-
-  res.status(200).send(users);
 });
 
 router.post("/signup/:role", async (req, res) => {
@@ -181,6 +166,8 @@ router.post("/signup/:role", async (req, res) => {
           include: [Login],
         });
         break;
+      default:
+        return res.status(400).send({ error: "Error! Invalid user type" });
     }
     //status , lastLogin has default values no need to set here
     if (!newUser)
