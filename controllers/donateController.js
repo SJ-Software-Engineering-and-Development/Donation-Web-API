@@ -114,4 +114,26 @@ router.get("/:id", async (req, res) => {
   return res.status(200).send({ data: donation });
 });
 
+router.patch("/:id/:status", async (req, res) => {
+  const status = req.params.status;
+  const id = req.params.id;
+
+  let updatedDonate;
+  let findDoante = await Donate.findByPk(id);
+  if (!findDoante)
+    return res.status(400).send({ error: "Donation not found with given id" });
+
+  updatedDonate = findDoante;
+  updatedDonate.status = status;
+
+  findDoante.set(updatedDonate);
+  updateF = await findDoante.save();
+  if (!updateF)
+    return res.status(400).send({ error: "Error! Server having some trubles" });
+
+  return res.status(200).send({
+    data: `Donation status has been updated successfuly`,
+  });
+});
+
 module.exports = router;
