@@ -102,4 +102,16 @@ router.post("/", async (req, res) => {
   });
 });
 
+router.get("/:id", async (req, res) => {
+  const fundId = req.params.id;
+
+  let donation = await Donate.findAll({
+    where: { fundId: fundId },
+    include: [userProfile],
+  });
+  if (!donation) return res.status(400).send({ error: "Not found" });
+
+  return res.status(200).send({ data: donation });
+});
+
 module.exports = router;
