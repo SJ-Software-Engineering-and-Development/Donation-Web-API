@@ -114,6 +114,17 @@ router.get("/:id", async (req, res) => {
   return res.status(200).send({ data: donation });
 });
 
+router.get("/getMyDonations/:myuid", async (req, res) => {
+  const donatorId = req.params.myuid;
+
+  let donation = await Donate.findAll({
+    where: { donatorId: donatorId },
+  });
+  if (!donation) return res.status(400).send({ error: "Not found" });
+
+  return res.status(200).send({ data: donation });
+});
+
 router.patch("/:id/:status", async (req, res) => {
   const status = req.params.status;
   const id = req.params.id;
