@@ -102,6 +102,13 @@ router.post("/", async (req, res) => {
   });
 });
 
+router.get("/", async (req, res) => {
+  const allDonations = await Donate.findAll();
+  if (!allDonations) return res.status(400).send({ error: "No data so far" });
+
+  return res.status(200).send({ data: allDonations });
+});
+
 router.get("/:id", async (req, res) => {
   const fundId = req.params.id;
 
