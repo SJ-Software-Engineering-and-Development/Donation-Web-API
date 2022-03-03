@@ -36,7 +36,7 @@ router.get("/getByid/:id", async (req, res) => {
   let totalDonAmount = 0;
 
   //get no of donatations for given id
-  Fund.count().then((c) => {
+  await Fund.count().then((c) => {
     totalDon = c;
   });
 
@@ -79,7 +79,7 @@ router.get("/getMyFunds/:id", async (req, res) => {
     fund = fundList[i].dataValues;
 
     //Get no of donations for each fund post
-    Donation.count({ where: { fundId: fundList[i].id } }).then((c) => {
+    await Donation.count({ where: { fundId: fundList[i].id } }).then((c) => {
       fund.totalDonations = c;
     });
 
